@@ -1,0 +1,36 @@
+spring:
+  application:
+    name: identity-service
+  datasource:
+    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:shopora_identity}?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+    username: ${DB_USERNAME:shopora}
+    password: ${DB_PASSWORD:shopora}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+
+server:
+  port: ${IDENTITY_SERVICE_PORT:8081}
+
+mybatis:
+  mapper-locations: classpath:/mybatis/*.xml
+  type-aliases-package: com.shopora.identityservice.infrastructure.persistence.model
+  configuration:
+    map-underscore-to-camel-case: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+jwt:
+  secret: ${JWT_SECRET}
+  access-expiration: ${JWT_ACCESS_EXPIRATION:900000}
+
+identity:
+  admin:
+    email: ${IDENTITY_ADMIN_EMAIL}
+    password: ${IDENTITY_ADMIN_PASSWORD}
+    name: ${IDENTITY_ADMIN_NAME}
