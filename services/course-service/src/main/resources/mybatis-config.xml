@@ -1,0 +1,3 @@
+<typeHandlers>
+    <typeHandler handler="course.courseservice.infrastructure.config.UuidTypeHandler" javaType="java.util.UUID"/>
+</typeHandlers>

@@ -1,4 +1,4 @@
-package course.courseservice.infrastructure.persistence.entity.enumeric;
+package course.courseservice.infrastructure.persistence.entity.enums;
 
 public enum CourseDifficultyLevel {
     BEGINNER,

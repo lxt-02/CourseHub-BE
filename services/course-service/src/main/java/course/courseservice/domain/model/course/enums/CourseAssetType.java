@@ -1,4 +1,4 @@
-package course.courseservice.infrastructure.persistence.entity.enumeric;
+package course.courseservice.domain.model.course.enums;
 
 public enum CourseAssetType {
     THUMBNAIL,

@@ -1,7 +1,7 @@
 package course.courseservice.infrastructure.persistence.entity;
 
-import course.courseservice.infrastructure.persistence.entity.enumeric.CourseDifficultyLevel;
-import course.courseservice.infrastructure.persistence.entity.enumeric.CourseStatus;
+import course.courseservice.infrastructure.persistence.entity.enums.CourseDifficultyLevel;
+import course.courseservice.infrastructure.persistence.entity.enums.CourseStatus;
 
 import java.math.BigDecimal;
 import java.time.Instant;

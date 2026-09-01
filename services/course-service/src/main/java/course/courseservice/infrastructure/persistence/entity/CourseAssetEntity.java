@@ -1,6 +1,6 @@
 package course.courseservice.infrastructure.persistence.entity;
 
-import course.courseservice.infrastructure.persistence.entity.enumeric.CourseAssetType;
+import course.courseservice.infrastructure.persistence.entity.enums.CourseAssetType;
 
 import java.time.Instant;
 import java.util.UUID;
