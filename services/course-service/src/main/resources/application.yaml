@@ -1,8 +1,15 @@
 spring:
   application:
     name: course-service
+  datasource:
+    url: ${COURSE_SERVICE_DB_URL:jdbc:postgresql://localhost:5432/course_service}
+    username: ${COURSE_SERVICE_DB_USERNAME:postgres}
+    password: ${COURSE_SERVICE_DB_PASSWORD:postgres}
+    driver-class-name: org.postgresql.Driver
 
 mybatis:
+  mapper-locations: classpath*:mybatis/**/*.xml
+  type-aliases-package: course.courseservice.infrastructure.persistence.entity
   configuration:
     map-underscore-to-camel-case: true
-    default-enum-type-handler: org.apache.ibatis.type.EnumTypeHandler
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
