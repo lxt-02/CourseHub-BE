@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="course.courseservice.infrastructure.persistence.repository.CategoryMybatisRepository">
+
+    <resultMap id="CategoryResultMap" type="course.courseservice.infrastructure.persistence.entity.CategoryInfraEntity">
+        <id property="id" column="id" typeHandler="course.courseservice.infrastructure.config.UuidTypeHandler"/>
+        <result property="name" column="name"/>
+        <result property="slug" column="slug"/>
+        <result property="description" column="description"/>
+        <result property="status" column="status"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+    </resultMap>
+
+    <sql id="CategoryColumns">
+        id, name, slug, description, status, created_at, updated_at
+    </sql>
+
+    <select id="findById" resultMap="CategoryResultMap">
+        SELECT <include refid="CategoryColumns"/>
+        FROM categories
+        WHERE id = #{id, typeHandler=course.courseservice.infrastructure.config.UuidTypeHandler}
+    </select>
+
+    <select id="findBySlug" resultMap="CategoryResultMap">
+        SELECT <include refid="CategoryColumns"/>
+        FROM categories
+        WHERE slug = #{slug}
+    </select>
+
+    <select id="findByName" resultMap="CategoryResultMap">
+        SELECT <include refid="CategoryColumns"/>
+        FROM categories
+        WHERE name = #{name}
+    </select>
+
+    <select id="findAll" resultMap="CategoryResultMap">
+        SELECT <include refid="CategoryColumns"/>
+        FROM categories
+        ORDER BY name ASC
+    </select>
+
+    <select id="existsBySlug" resultType="boolean">
+        SELECT EXISTS (
+            SELECT 1
+            FROM categories
+            WHERE slug = #{slug}
+        )
+    </select>
+
+    <select id="existsById" resultType="boolean">
+        SELECT EXISTS (
+            SELECT 1
+            FROM categories
+            WHERE id = #{id, typeHandler=course.courseservice.infrastructure.config.UuidTypeHandler}
+        )
+    </select>
+
+    <insert id="insert" parameterType="course.courseservice.infrastructure.persistence.entity.CategoryInfraEntity">
+        INSERT INTO categories (id, name, slug, description, status, created_at, updated_at)
+        VALUES (
+            #{category.id, typeHandler=course.courseservice.infrastructure.config.UuidTypeHandler},
+            #{category.name},
+            #{category.slug},
+            #{category.description},
+            #{category.status},
+            #{category.createdAt},
+            #{category.updatedAt}
+        )
+    </insert>
+
+    <update id="update" parameterType="course.courseservice.infrastructure.persistence.entity.CategoryInfraEntity">
+        UPDATE categories
+        SET name = #{category.name},
+            slug = #{category.slug},
+            description = #{category.description},
+            status = #{category.status},
+            updated_at = #{category.updatedAt}
+        WHERE id = #{category.id, typeHandler=course.courseservice.infrastructure.config.UuidTypeHandler}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM categories
+        WHERE id = #{id, typeHandler=course.courseservice.infrastructure.config.UuidTypeHandler}
+    </delete>
+
+</mapper>

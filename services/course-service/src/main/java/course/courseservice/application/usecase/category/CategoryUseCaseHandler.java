@@ -1,4 +1,4 @@
-package course.courseservice.application.service;
+package course.courseservice.application.usecase.category;
 
 import course.courseservice.application.command.category.CreateCategoryCommand;
 import course.courseservice.application.command.category.UpdateCategoryCommand;
@@ -15,7 +15,13 @@ import java.util.List;
 import java.util.UUID;
 
 @Service
-public record CategoryApplicationService(CategoryRepository categoryRepository) {
+public class CategoryUseCaseHandler {
+
+    private final CategoryRepository categoryRepository;
+
+    public CategoryUseCaseHandler(CategoryRepository categoryRepository) {
+        this.categoryRepository = categoryRepository;
+    }
 
     @Transactional
     public CategoryResponse create(CreateCategoryCommand command) {

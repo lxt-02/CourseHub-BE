@@ -1,0 +1,262 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="course.courseservice.infrastructure.persistence.repository.CourseMybatisRepository">
+
+    <resultMap id="CourseResultMap" type="course.courseservice.infrastructure.persistence.entity.CourseInfraEntity">
+        <id property="id" column="id" typeHandler="course.courseservice.infrastructure.config.UuidTypeHandler"/>
+        <result property="managerId" column="manager_id" typeHandler="course.courseservice.infrastructure.config.UuidTypeHandler"/>
+        <result property="title" column="title"/>
+        <result property="slug" column="slug"/>
+        <result property="shortDescription" column="short_description"/>
+        <result property="description" column="description"/>
+        <result property="thumbnailUrl" column="thumbnail_url"/>
+        <result property="price" column="price"/>
+        <result property="difficultyLevel" column="difficulty_level"/>
+        <result property="status" column="status"/>
+        <result property="publishedAt" column="published_at"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+    </resultMap>
+
+    <resultMap id="ModuleResultMap" type="course.courseservice.infrastructure.persistence.entity.ModuleInfraEntity">
+        <id property="id" column="id" typeHandler="course.courseservice.infrastructure.config.UuidTypeHandler"/>
+        <result property="courseId" column="course_id" typeHandler="course.courseservice.infrastructure.config.UuidTypeHandler"/>
+        <result property="title" column="title"/>
+        <result property="description" column="description"/>
+        <result property="position" column="position"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+    </resultMap>
+
+    <resultMap id="LessonResultMap" type="course.courseservice.infrastructure.persistence.entity.LessonInfraEntity">
+        <id property="id" column="id" typeHandler="course.courseservice.infrastructure.config.UuidTypeHandler"/>
+        <result property="moduleId" column="module_id" typeHandler="course.courseservice.infrastructure.config.UuidTypeHandler"/>
+        <result property="title" column="title"/>
+        <result property="description" column="description"/>
+        <result property="lessonType" column="lesson_type"/>
+        <result property="content" column="content"/>
+        <result property="videoUrl" column="video_url"/>
+        <result property="documentUrl" column="document_url"/>
+        <result property="durationSeconds" column="duration_seconds"/>
+        <result property="position" column="position"/>
+        <result property="preview" column="is_preview"/>
+        <result property="required" column="is_required"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+    </resultMap>
+
+    <resultMap id="CourseAssetResultMap" type="course.courseservice.infrastructure.persistence.entity.CourseAssetInfraEntity">
+        <id property="id" column="id" typeHandler="course.courseservice.infrastructure.config.UuidTypeHandler"/>
+        <result property="courseId" column="course_id" typeHandler="course.courseservice.infrastructure.config.UuidTypeHandler"/>
+        <result property="assetType" column="asset_type"/>
+        <result property="assetUrl" column="asset_url"/>
+        <result property="fileName" column="file_name"/>
+        <result property="fileSize" column="file_size"/>
+        <result property="createdAt" column="created_at"/>
+    </resultMap>
+
+    <resultMap id="CourseCategoryResultMap" type="course.courseservice.infrastructure.persistence.entity.CourseCategoryInfraEntity">
+        <id property="courseId" column="course_id" typeHandler="course.courseservice.infrastructure.config.UuidTypeHandler"/>
+        <id property="categoryId" column="category_id" typeHandler="course.courseservice.infrastructure.config.UuidTypeHandler"/>
+        <result property="createdAt" column="created_at"/>
+    </resultMap>
+
+    <sql id="CourseColumns">
+        id, manager_id, title, slug, short_description, description,
+        thumbnail_url, price, difficulty_level, status, published_at,
+        created_at, updated_at
+    </sql>
+
+    <select id="findById" resultMap="CourseResultMap">
+        SELECT <include refid="CourseColumns"/>
+        FROM courses
+        WHERE id = #{id, typeHandler=course.courseservice.infrastructure.config.UuidTypeHandler}
+    </select>
+
+    <select id="findBySlug" resultMap="CourseResultMap">
+        SELECT <include refid="CourseColumns"/>
+        FROM courses
+        WHERE slug = #{slug}
+    </select>
+
+    <select id="findByManagerId" resultMap="CourseResultMap">
+        SELECT <include refid="CourseColumns"/>
+        FROM courses
+        WHERE manager_id = #{managerId, typeHandler=course.courseservice.infrastructure.config.UuidTypeHandler}
+        ORDER BY created_at DESC
+    </select>
+
+    <select id="existsBySlug" resultType="boolean">
+        SELECT EXISTS (
+            SELECT 1
+            FROM courses
+            WHERE slug = #{slug}
+        )
+    </select>
+
+    <select id="existsById" resultType="boolean">
+        SELECT EXISTS (
+            SELECT 1
+            FROM courses
+            WHERE id = #{id, typeHandler=course.courseservice.infrastructure.config.UuidTypeHandler}
+        )
+    </select>
+
+    <insert id="insert" parameterType="course.courseservice.infrastructure.persistence.entity.CourseInfraEntity">
+        INSERT INTO courses (
+            id, manager_id, title, slug, short_description, description,
+            thumbnail_url, price, difficulty_level, status, published_at,
+            created_at, updated_at
+        )
+        VALUES (
+            #{course.id, typeHandler=course.courseservice.infrastructure.config.UuidTypeHandler},
+            #{course.managerId, typeHandler=course.courseservice.infrastructure.config.UuidTypeHandler},
+            #{course.title},
+            #{course.slug},
+            #{course.shortDescription},
+            #{course.description},
+            #{course.thumbnailUrl},
+            #{course.price},
+            #{course.difficultyLevel},
+            #{course.status},
+            #{course.publishedAt},
+            #{course.createdAt},
+            #{course.updatedAt}
+        )
+    </insert>
+
+    <update id="update" parameterType="course.courseservice.infrastructure.persistence.entity.CourseInfraEntity">
+        UPDATE courses
+        SET manager_id = #{course.managerId, typeHandler=course.courseservice.infrastructure.config.UuidTypeHandler},
+            title = #{course.title},
+            slug = #{course.slug},
+            short_description = #{course.shortDescription},
+            description = #{course.description},
+            thumbnail_url = #{course.thumbnailUrl},
+            price = #{course.price},
+            difficulty_level = #{course.difficultyLevel},
+            status = #{course.status},
+            published_at = #{course.publishedAt},
+            updated_at = #{course.updatedAt}
+        WHERE id = #{course.id, typeHandler=course.courseservice.infrastructure.config.UuidTypeHandler}
+    </update>
+
+    <update id="updateStatus">
+        UPDATE courses
+        SET status = #{status},
+            updated_at = CURRENT_TIMESTAMP
+        WHERE id = #{id, typeHandler=course.courseservice.infrastructure.config.UuidTypeHandler}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM courses
+        WHERE id = #{id, typeHandler=course.courseservice.infrastructure.config.UuidTypeHandler}
+    </delete>
+
+    <select id="findModulesByCourseId" resultMap="ModuleResultMap">
+        SELECT id, course_id, title, description, position, created_at, updated_at
+        FROM modules
+        WHERE course_id = #{courseId, typeHandler=course.courseservice.infrastructure.config.UuidTypeHandler}
+        ORDER BY position ASC
+    </select>
+
+    <select id="findLessonsByModuleId" resultMap="LessonResultMap">
+        SELECT id, module_id, title, description, lesson_type, content, video_url,
+               document_url, duration_seconds, position, is_preview, is_required,
+               created_at, updated_at
+        FROM lessons
+        WHERE module_id = #{moduleId, typeHandler=course.courseservice.infrastructure.config.UuidTypeHandler}
+        ORDER BY position ASC
+    </select>
+
+    <select id="findAssetsByCourseId" resultMap="CourseAssetResultMap">
+        SELECT id, course_id, asset_type, asset_url, file_name, file_size, created_at
+        FROM course_assets
+        WHERE course_id = #{courseId, typeHandler=course.courseservice.infrastructure.config.UuidTypeHandler}
+        ORDER BY created_at ASC
+    </select>
+
+    <select id="findCategoriesByCourseId" resultMap="CourseCategoryResultMap">
+        SELECT course_id, category_id, created_at
+        FROM course_categories
+        WHERE course_id = #{courseId, typeHandler=course.courseservice.infrastructure.config.UuidTypeHandler}
+        ORDER BY created_at ASC
+    </select>
+
+    <insert id="insertModule" parameterType="course.courseservice.infrastructure.persistence.entity.ModuleInfraEntity">
+        INSERT INTO modules (id, course_id, title, description, position, created_at, updated_at)
+        VALUES (
+            #{module.id, typeHandler=course.courseservice.infrastructure.config.UuidTypeHandler},
+            #{module.courseId, typeHandler=course.courseservice.infrastructure.config.UuidTypeHandler},
+            #{module.title},
+            #{module.description},
+            #{module.position},
+            #{module.createdAt},
+            #{module.updatedAt}
+        )
+    </insert>
+
+    <insert id="insertLesson" parameterType="course.courseservice.infrastructure.persistence.entity.LessonInfraEntity">
+        INSERT INTO lessons (
+            id, module_id, title, description, lesson_type, content, video_url,
+            document_url, duration_seconds, position, is_preview, is_required,
+            created_at, updated_at
+        )
+        VALUES (
+            #{lesson.id, typeHandler=course.courseservice.infrastructure.config.UuidTypeHandler},
+            #{lesson.moduleId, typeHandler=course.courseservice.infrastructure.config.UuidTypeHandler},
+            #{lesson.title},
+            #{lesson.description},
+            #{lesson.lessonType},
+            #{lesson.content},
+            #{lesson.videoUrl},
+            #{lesson.documentUrl},
+            #{lesson.durationSeconds},
+            #{lesson.position},
+            #{lesson.preview},
+            #{lesson.required},
+            #{lesson.createdAt},
+            #{lesson.updatedAt}
+        )
+    </insert>
+
+    <insert id="insertAsset" parameterType="course.courseservice.infrastructure.persistence.entity.CourseAssetInfraEntity">
+        INSERT INTO course_assets (id, course_id, asset_type, asset_url, file_name, file_size, created_at)
+        VALUES (
+            #{asset.id, typeHandler=course.courseservice.infrastructure.config.UuidTypeHandler},
+            #{asset.courseId, typeHandler=course.courseservice.infrastructure.config.UuidTypeHandler},
+            #{asset.assetType},
+            #{asset.assetUrl},
+            #{asset.fileName},
+            #{asset.fileSize},
+            #{asset.createdAt}
+        )
+    </insert>
+
+    <insert id="insertCategory" parameterType="course.courseservice.infrastructure.persistence.entity.CourseCategoryInfraEntity">
+        INSERT INTO course_categories (course_id, category_id, created_at)
+        VALUES (
+            #{courseCategory.courseId, typeHandler=course.courseservice.infrastructure.config.UuidTypeHandler},
+            #{courseCategory.categoryId, typeHandler=course.courseservice.infrastructure.config.UuidTypeHandler},
+            #{courseCategory.createdAt}
+        )
+    </insert>
+
+    <delete id="deleteModulesByCourseId">
+        DELETE FROM modules
+        WHERE course_id = #{courseId, typeHandler=course.courseservice.infrastructure.config.UuidTypeHandler}
+    </delete>
+
+    <delete id="deleteAssetsByCourseId">
+        DELETE FROM course_assets
+        WHERE course_id = #{courseId, typeHandler=course.courseservice.infrastructure.config.UuidTypeHandler}
+    </delete>
+
+    <delete id="deleteCategoriesByCourseId">
+        DELETE FROM course_categories
+        WHERE course_id = #{courseId, typeHandler=course.courseservice.infrastructure.config.UuidTypeHandler}
+    </delete>
+
+</mapper>
