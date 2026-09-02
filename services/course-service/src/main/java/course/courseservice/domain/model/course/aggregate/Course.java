@@ -5,6 +5,7 @@ import course.courseservice.domain.model.course.entity.CourseModule;
 import course.courseservice.domain.model.course.enums.CourseAssetType;
 import course.courseservice.domain.model.course.enums.CourseDifficultyLevel;
 import course.courseservice.domain.model.course.enums.CourseStatus;
+import course.courseservice.domain.model.course.enums.LessonType;
 import course.courseservice.domain.model.course.exception.CourseDomainException;
 import course.courseservice.domain.model.course.valueobject.Money;
 import course.courseservice.domain.model.course.valueobject.Slug;
@@ -115,6 +116,24 @@ public class Course {
         ensureModulePositionAvailable(position, moduleId);
         module.update(module.getTitle(), module.getDescription(), position);
         sortModules();
+        updatedAt = Instant.now();
+    }
+
+    public void addLesson(UUID moduleId, String title, LessonType lessonType, int position) {
+        ensureEditable();
+        findModule(moduleId).addLesson(title, lessonType, position);
+        updatedAt = Instant.now();
+    }
+
+    public void removeLesson(UUID moduleId, UUID lessonId) {
+        ensureEditable();
+        findModule(moduleId).removeLesson(lessonId);
+        updatedAt = Instant.now();
+    }
+
+    public void moveLesson(UUID moduleId, UUID lessonId, int position) {
+        ensureEditable();
+        findModule(moduleId).moveLesson(lessonId, position);
         updatedAt = Instant.now();
     }
 

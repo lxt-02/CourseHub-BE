@@ -1,4 +1,4 @@
-package course.courseservice.application.service;
+package course.courseservice.application.usecase.course;
 
 import course.courseservice.application.command.course.AddCourseAssetCommand;
 import course.courseservice.application.command.course.AddLessonCommand;
@@ -23,7 +23,13 @@ import java.util.List;
 import java.util.UUID;
 
 @Service
-public record CourseApplicationService(CourseRepository courseRepository) {
+public class CourseUseCaseHandler {
+
+    private final CourseRepository courseRepository;
+
+    public CourseUseCaseHandler(CourseRepository courseRepository) {
+        this.courseRepository = courseRepository;
+    }
 
     @Transactional
     public CourseResponse create(CreateCourseCommand command) {
