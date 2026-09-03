@@ -5,6 +5,7 @@ import course.courseservice.application.command.category.UpdateCategoryCommand;
 import course.courseservice.application.dto.category.CategoryResponse;
 import course.courseservice.application.exception.ApplicationConflictException;
 import course.courseservice.application.exception.ApplicationNotFoundException;
+import course.courseservice.application.port.CategoryEventPublisherPort;
 import course.courseservice.domain.model.category.aggregate.Category;
 import course.courseservice.domain.model.course.valueobject.Slug;
 import course.courseservice.domain.repository.CategoryRepository;
@@ -18,9 +19,11 @@ import java.util.UUID;
 public class CategoryUseCaseHandler {
 
     private final CategoryRepository categoryRepository;
+    private final CategoryEventPublisherPort categoryEventPublisherPort;
 
-    public CategoryUseCaseHandler(CategoryRepository categoryRepository) {
+    public CategoryUseCaseHandler(CategoryRepository categoryRepository, CategoryEventPublisherPort categoryEventPublisherPort) {
         this.categoryRepository = categoryRepository;
+        this.categoryEventPublisherPort = categoryEventPublisherPort;
     }
 
     @Transactional
@@ -29,7 +32,9 @@ public class CategoryUseCaseHandler {
         ensureSlugAvailable(slug, null);
 
         Category category = Category.create(command.name(), command.description());
-        return CategoryResponse.from(categoryRepository.save(category));
+        Category saved = categoryRepository.save(category);
+        categoryEventPublisherPort.publishCreated(saved);
+        return CategoryResponse.from(saved);
     }
 
     @Transactional(readOnly = true)
@@ -61,26 +66,33 @@ public class CategoryUseCaseHandler {
         ensureSlugAvailable(slug, id);
 
         category.update(command.name(), slug, command.description());
-        return CategoryResponse.from(categoryRepository.save(category));
+        Category saved = categoryRepository.save(category);
+        categoryEventPublisherPort.publishUpdated(saved);
+        return CategoryResponse.from(saved);
     }
 
     @Transactional
     public CategoryResponse activate(UUID id) {
         Category category = findCategory(id);
         category.activate();
-        return CategoryResponse.from(categoryRepository.save(category));
+        Category saved = categoryRepository.save(category);
+        categoryEventPublisherPort.publishUpdated(saved);
+        return CategoryResponse.from(saved);
     }
 
     @Transactional
     public CategoryResponse deactivate(UUID id) {
         Category category = findCategory(id);
         category.deactivate();
-        return CategoryResponse.from(categoryRepository.save(category));
+        Category saved = categoryRepository.save(category);
+        categoryEventPublisherPort.publishUpdated(saved);
+        return CategoryResponse.from(saved);
     }
 
     @Transactional
     public void delete(UUID id) {
         categoryRepository.deleteById(id);
+        categoryEventPublisherPort.publishDeleted(id.toString());
     }
 
     private Category findCategory(UUID id) {

@@ -11,6 +11,7 @@ import course.courseservice.application.command.course.UpdateCourseCommand;
 import course.courseservice.application.dto.course.CourseResponse;
 import course.courseservice.application.exception.ApplicationConflictException;
 import course.courseservice.application.exception.ApplicationNotFoundException;
+import course.courseservice.application.port.CourseEventPublisherPort;
 import course.courseservice.domain.model.course.aggregate.Course;
 import course.courseservice.domain.model.course.valueobject.Money;
 import course.courseservice.domain.model.course.valueobject.Slug;
@@ -26,9 +27,11 @@ import java.util.UUID;
 public class CourseUseCaseHandler {
 
     private final CourseRepository courseRepository;
+    private final CourseEventPublisherPort courseEventPublisherPort;
 
-    public CourseUseCaseHandler(CourseRepository courseRepository) {
+    public CourseUseCaseHandler(CourseRepository courseRepository, CourseEventPublisherPort courseEventPublisherPort) {
         this.courseRepository = courseRepository;
+        this.courseEventPublisherPort = courseEventPublisherPort;
     }
 
     @Transactional
@@ -45,7 +48,9 @@ public class CourseUseCaseHandler {
                 command.difficultyLevel()
         );
 
-        return CourseResponse.from(courseRepository.save(course));
+        Course saved = courseRepository.save(course);
+        courseEventPublisherPort.publishCreated(saved);
+        return CourseResponse.from(saved);
     }
 
     @Transactional(readOnly = true)
@@ -86,96 +91,120 @@ public class CourseUseCaseHandler {
                 command.difficultyLevel()
         );
 
-        return CourseResponse.from(courseRepository.save(course));
+        Course saved = courseRepository.save(course);
+        courseEventPublisherPort.publishUpdated(saved);
+        return CourseResponse.from(saved);
     }
 
     @Transactional
     public CourseResponse publish(UUID id) {
         Course course = findCourse(id);
         course.publish();
-        return CourseResponse.from(courseRepository.save(course));
+        Course saved = courseRepository.save(course);
+        courseEventPublisherPort.publishUpdated(saved);
+        return CourseResponse.from(saved);
     }
 
     @Transactional
     public CourseResponse archive(UUID id) {
         Course course = findCourse(id);
         course.archive();
-        return CourseResponse.from(courseRepository.save(course));
+        Course saved = courseRepository.save(course);
+        courseEventPublisherPort.publishUpdated(saved);
+        return CourseResponse.from(saved);
     }
 
     @Transactional
     public CourseResponse returnToDraft(UUID id) {
         Course course = findCourse(id);
         course.returnToDraft();
-        return CourseResponse.from(courseRepository.save(course));
+        Course saved = courseRepository.save(course);
+        courseEventPublisherPort.publishUpdated(saved);
+        return CourseResponse.from(saved);
     }
 
     @Transactional
     public CourseResponse assignCategories(UUID id, AssignCourseCategoriesCommand command) {
         Course course = findCourse(id);
         course.assignCategories(command.categoryIds());
-        return CourseResponse.from(courseRepository.save(course));
+        Course saved = courseRepository.save(course);
+        courseEventPublisherPort.publishUpdated(saved);
+        return CourseResponse.from(saved);
     }
 
     @Transactional
     public CourseResponse addModule(UUID id, AddModuleCommand command) {
         Course course = findCourse(id);
         course.addModule(command.title(), command.position());
-        return CourseResponse.from(courseRepository.save(course));
+        Course saved = courseRepository.save(course);
+        courseEventPublisherPort.publishUpdated(saved);
+        return CourseResponse.from(saved);
     }
 
     @Transactional
     public CourseResponse moveModule(UUID courseId, UUID moduleId, MoveModuleCommand command) {
         Course course = findCourse(courseId);
         course.moveModule(moduleId, command.position());
-        return CourseResponse.from(courseRepository.save(course));
+        Course saved = courseRepository.save(course);
+        courseEventPublisherPort.publishUpdated(saved);
+        return CourseResponse.from(saved);
     }
 
     @Transactional
     public void removeModule(UUID courseId, UUID moduleId) {
         Course course = findCourse(courseId);
         course.removeModule(moduleId);
-        courseRepository.save(course);
+        Course saved = courseRepository.save(course);
+        courseEventPublisherPort.publishUpdated(saved);
     }
 
     @Transactional
     public CourseResponse addLesson(UUID courseId, UUID moduleId, AddLessonCommand command) {
         Course course = findCourse(courseId);
         course.addLesson(moduleId, command.title(), command.lessonType(), command.position());
-        return CourseResponse.from(courseRepository.save(course));
+        Course saved = courseRepository.save(course);
+        courseEventPublisherPort.publishUpdated(saved);
+        return CourseResponse.from(saved);
     }
 
     @Transactional
     public CourseResponse moveLesson(UUID courseId, UUID moduleId, UUID lessonId, MoveLessonCommand command) {
         Course course = findCourse(courseId);
         course.moveLesson(moduleId, lessonId, command.position());
-        return CourseResponse.from(courseRepository.save(course));
+        Course saved = courseRepository.save(course);
+        courseEventPublisherPort.publishUpdated(saved);
+        return CourseResponse.from(saved);
     }
 
     @Transactional
     public void removeLesson(UUID courseId, UUID moduleId, UUID lessonId) {
         Course course = findCourse(courseId);
         course.removeLesson(moduleId, lessonId);
-        courseRepository.save(course);
+        Course saved = courseRepository.save(course);
+        courseEventPublisherPort.publishUpdated(saved);
     }
 
     @Transactional
     public CourseResponse addAsset(UUID id, AddCourseAssetCommand command) {
         Course course = findCourse(id);
         course.addAsset(command.assetType(), command.assetUrl(), command.fileName(), command.fileSize());
-        return CourseResponse.from(courseRepository.save(course));
+        Course saved = courseRepository.save(course);
+        courseEventPublisherPort.publishUpdated(saved);
+        return CourseResponse.from(saved);
     }
 
     @Transactional
     public void removeAsset(UUID courseId, UUID assetId) {
         Course course = findCourse(courseId);
         course.removeAsset(assetId);
-        courseRepository.save(course);
+        Course saved = courseRepository.save(course);
+        courseEventPublisherPort.publishUpdated(saved);
     }
 
     @Transactional
     public void delete(UUID id) {
         courseRepository.deleteById(id);
+        courseEventPublisherPort.publishDeleted(id.toString());
     }
 
     private Course findCourse(UUID id) {
