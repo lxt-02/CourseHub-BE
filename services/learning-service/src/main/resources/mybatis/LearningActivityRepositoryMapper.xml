@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="course.learningservice.infrastructure.persistence.repository.LearningActivityRepository">
+    <resultMap id="LearningActivityResultMap" type="course.learningservice.infrastructure.persistence.entity.LearningActivityEntity">
+        <id property="id" column="id"/>
+        <result property="learnerId" column="learner_id"/>
+        <result property="courseId" column="course_id"/>
+        <result property="lessonId" column="lesson_id"/>
+        <result property="activityType" column="activity_type"/>
+        <result property="metadata" column="metadata"/>
+        <result property="occurredAt" column="occurred_at"/>
+        <result property="createdAt" column="created_at"/>
+    </resultMap>
+
+    <sql id="LearningActivityColumns">
+        id, learner_id, course_id, lesson_id, activity_type, metadata::text AS metadata,
+        occurred_at, created_at
+    </sql>
+
+    <select id="findById" resultMap="LearningActivityResultMap">
+        SELECT <include refid="LearningActivityColumns"/>
+        FROM learning_activities
+        WHERE id = #{id}
+    </select>
+
+    <select id="findByLearnerId" resultMap="LearningActivityResultMap">
+        SELECT <include refid="LearningActivityColumns"/>
+        FROM learning_activities
+        WHERE learner_id = #{learnerId}
+        ORDER BY occurred_at DESC
+    </select>
+
+    <select id="findByCourseId" resultMap="LearningActivityResultMap">
+        SELECT <include refid="LearningActivityColumns"/>
+        FROM learning_activities
+        WHERE course_id = #{courseId}
+        ORDER BY occurred_at DESC
+    </select>
+
+    <select id="findByLearnerIdAndCourseId" resultMap="LearningActivityResultMap">
+        SELECT <include refid="LearningActivityColumns"/>
+        FROM learning_activities
+        WHERE learner_id = #{learnerId}
+          AND course_id = #{courseId}
+        ORDER BY occurred_at DESC
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="learningActivity.id" keyColumn="id">
+        INSERT INTO learning_activities (
+            learner_id, course_id, lesson_id, activity_type, metadata, occurred_at
+        )
+        VALUES (
+            #{learningActivity.learnerId}, #{learningActivity.courseId},
+            #{learningActivity.lessonId}, #{learningActivity.activityType},
+            CAST(#{learningActivity.metadata} AS jsonb), #{learningActivity.occurredAt}
+        )
+    </insert>
+
+    <delete id="deleteById">
+        DELETE FROM learning_activities
+        WHERE id = #{id}
+    </delete>
+</mapper>

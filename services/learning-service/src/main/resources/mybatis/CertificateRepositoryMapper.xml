@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="course.learningservice.infrastructure.persistence.repository.CertificateRepository">
+    <resultMap id="CertificateResultMap" type="course.learningservice.infrastructure.persistence.entity.CertificateEntity">
+        <id property="id" column="id"/>
+        <result property="learnerId" column="learner_id"/>
+        <result property="courseId" column="course_id"/>
+        <result property="certificateCode" column="certificate_code"/>
+        <result property="certificateUrl" column="certificate_url"/>
+        <result property="issuedAt" column="issued_at"/>
+        <result property="createdAt" column="created_at"/>
+    </resultMap>
+
+    <sql id="CertificateColumns">
+        id, learner_id, course_id, certificate_code, certificate_url, issued_at, created_at
+    </sql>
+
+    <select id="findById" resultMap="CertificateResultMap">
+        SELECT <include refid="CertificateColumns"/>
+        FROM certificates
+        WHERE id = #{id}
+    </select>
+
+    <select id="findByCertificateCode" resultMap="CertificateResultMap">
+        SELECT <include refid="CertificateColumns"/>
+        FROM certificates
+        WHERE certificate_code = #{certificateCode}
+    </select>
+
+    <select id="findByLearnerIdAndCourseId" resultMap="CertificateResultMap">
+        SELECT <include refid="CertificateColumns"/>
+        FROM certificates
+        WHERE learner_id = #{learnerId}
+          AND course_id = #{courseId}
+    </select>
+
+    <select id="findByLearnerId" resultMap="CertificateResultMap">
+        SELECT <include refid="CertificateColumns"/>
+        FROM certificates
+        WHERE learner_id = #{learnerId}
+        ORDER BY issued_at DESC
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="certificate.id" keyColumn="id">
+        INSERT INTO certificates (
+            learner_id, course_id, certificate_code, certificate_url, issued_at
+        )
+        VALUES (
+            #{certificate.learnerId}, #{certificate.courseId}, #{certificate.certificateCode},
+            #{certificate.certificateUrl}, #{certificate.issuedAt}
+        )
+    </insert>
+
+    <update id="update">
+        UPDATE certificates
+        SET certificate_code = #{certificate.certificateCode},
+            certificate_url = #{certificate.certificateUrl},
+            issued_at = #{certificate.issuedAt}
+        WHERE id = #{certificate.id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM certificates
+        WHERE id = #{id}
+    </delete>
+</mapper>

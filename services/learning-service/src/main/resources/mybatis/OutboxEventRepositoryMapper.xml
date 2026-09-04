@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="course.learningservice.infrastructure.persistence.repository.OutboxEventRepository">
+    <resultMap id="OutboxEventResultMap" type="course.learningservice.infrastructure.persistence.entity.OutboxEventEntity">
+        <id property="id" column="id"/>
+        <result property="aggregateType" column="aggregate_type"/>
+        <result property="aggregateId" column="aggregate_id"/>
+        <result property="eventType" column="event_type"/>
+        <result property="payload" column="payload"/>
+        <result property="status" column="status"/>
+        <result property="retryCount" column="retry_count"/>
+        <result property="lastError" column="last_error"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="publishedAt" column="published_at"/>
+    </resultMap>
+
+    <sql id="OutboxEventColumns">
+        id, aggregate_type, aggregate_id, event_type, payload::text AS payload, status,
+        retry_count, last_error, created_at, published_at
+    </sql>
+
+    <select id="findById" resultMap="OutboxEventResultMap">
+        SELECT <include refid="OutboxEventColumns"/>
+        FROM outbox_events
+        WHERE id = #{id}
+    </select>
+
+    <select id="findByStatus" resultMap="OutboxEventResultMap">
+        SELECT <include refid="OutboxEventColumns"/>
+        FROM outbox_events
+        WHERE status = #{status}
+        ORDER BY created_at ASC
+    </select>
+
+    <select id="findPending" resultMap="OutboxEventResultMap">
+        SELECT <include refid="OutboxEventColumns"/>
+        FROM outbox_events
+        WHERE status = 'PENDING'
+        ORDER BY created_at ASC
+        LIMIT #{limit}
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="outboxEvent.id" keyColumn="id">
+        INSERT INTO outbox_events (
+            aggregate_type, aggregate_id, event_type, payload,
+            status, retry_count, last_error, published_at
+        )
+        VALUES (
+            #{outboxEvent.aggregateType}, #{outboxEvent.aggregateId},
+            #{outboxEvent.eventType}, CAST(#{outboxEvent.payload} AS jsonb),
+            #{outboxEvent.status}, #{outboxEvent.retryCount},
+            #{outboxEvent.lastError}, #{outboxEvent.publishedAt}
+        )
+    </insert>
+
+    <update id="updatePublishState">
+        UPDATE outbox_events
+        SET status = #{outboxEvent.status},
+            retry_count = #{outboxEvent.retryCount},
+            last_error = #{outboxEvent.lastError},
+            published_at = #{outboxEvent.publishedAt}
+        WHERE id = #{outboxEvent.id}
+    </update>
+
+    <update id="markPublished">
+        UPDATE outbox_events
+        SET status = 'PUBLISHED',
+            published_at = #{publishedAt},
+            last_error = NULL
+        WHERE id = #{id}
+    </update>
+
+    <update id="markFailed">
+        UPDATE outbox_events
+        SET status = 'FAILED',
+            retry_count = retry_count + 1,
+            last_error = #{lastError}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM outbox_events
+        WHERE id = #{id}
+    </delete>
+</mapper>

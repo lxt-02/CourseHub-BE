@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="course.learningservice.infrastructure.persistence.repository.LessonProgressRepository">
+    <resultMap id="LessonProgressResultMap" type="course.learningservice.infrastructure.persistence.entity.LessonProgressEntity">
+        <id property="id" column="id"/>
+        <result property="learnerId" column="learner_id"/>
+        <result property="courseId" column="course_id"/>
+        <result property="lessonId" column="lesson_id"/>
+        <result property="watchedSeconds" column="watched_seconds"/>
+        <result property="progressPercent" column="progress_percent"/>
+        <result property="status" column="status"/>
+        <result property="startedAt" column="started_at"/>
+        <result property="lastAccessedAt" column="last_accessed_at"/>
+        <result property="completedAt" column="completed_at"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+    </resultMap>
+
+    <sql id="LessonProgressColumns">
+        id, learner_id, course_id, lesson_id, watched_seconds, progress_percent, status,
+        started_at, last_accessed_at, completed_at, created_at, updated_at
+    </sql>
+
+    <select id="findById" resultMap="LessonProgressResultMap">
+        SELECT <include refid="LessonProgressColumns"/>
+        FROM lesson_progress
+        WHERE id = #{id}
+    </select>
+
+    <select id="findByLearnerIdAndLessonId" resultMap="LessonProgressResultMap">
+        SELECT <include refid="LessonProgressColumns"/>
+        FROM lesson_progress
+        WHERE learner_id = #{learnerId}
+          AND lesson_id = #{lessonId}
+    </select>
+
+    <select id="findByLearnerIdAndCourseId" resultMap="LessonProgressResultMap">
+        SELECT <include refid="LessonProgressColumns"/>
+        FROM lesson_progress
+        WHERE learner_id = #{learnerId}
+          AND course_id = #{courseId}
+        ORDER BY updated_at DESC
+    </select>
+
+    <select id="findByLearnerId" resultMap="LessonProgressResultMap">
+        SELECT <include refid="LessonProgressColumns"/>
+        FROM lesson_progress
+        WHERE learner_id = #{learnerId}
+        ORDER BY updated_at DESC
+    </select>
+
+    <select id="findByCourseId" resultMap="LessonProgressResultMap">
+        SELECT <include refid="LessonProgressColumns"/>
+        FROM lesson_progress
+        WHERE course_id = #{courseId}
+        ORDER BY updated_at DESC
+    </select>
+
+    <select id="findByStatus" resultMap="LessonProgressResultMap">
+        SELECT <include refid="LessonProgressColumns"/>
+        FROM lesson_progress
+        WHERE status = #{status}
+        ORDER BY updated_at DESC
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="lessonProgress.id" keyColumn="id">
+        INSERT INTO lesson_progress (
+            learner_id, course_id, lesson_id, watched_seconds,
+            progress_percent, status, started_at, last_accessed_at, completed_at
+        )
+        VALUES (
+            #{lessonProgress.learnerId}, #{lessonProgress.courseId},
+            #{lessonProgress.lessonId}, #{lessonProgress.watchedSeconds},
+            #{lessonProgress.progressPercent}, #{lessonProgress.status},
+            #{lessonProgress.startedAt}, #{lessonProgress.lastAccessedAt},
+            #{lessonProgress.completedAt}
+        )
+    </insert>
+
+    <update id="update">
+        UPDATE lesson_progress
+        SET learner_id = #{lessonProgress.learnerId},
+            course_id = #{lessonProgress.courseId},
+            lesson_id = #{lessonProgress.lessonId},
+            watched_seconds = #{lessonProgress.watchedSeconds},
+            progress_percent = #{lessonProgress.progressPercent},
+            status = #{lessonProgress.status},
+            started_at = #{lessonProgress.startedAt},
+            last_accessed_at = #{lessonProgress.lastAccessedAt},
+            completed_at = #{lessonProgress.completedAt},
+            updated_at = CURRENT_TIMESTAMP
+        WHERE id = #{lessonProgress.id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM lesson_progress
+        WHERE id = #{id}
+    </delete>
+</mapper>
