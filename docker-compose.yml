@@ -3,16 +3,16 @@ services:
     image: postgres:16-alpine
     container_name: course-service-db
     environment:
-      POSTGRES_DB: course_service
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: ${COURSE_SERVICE_DB_NAME:-course_service}
+      POSTGRES_USER: ${COURSE_SERVICE_DB_USERNAME:?Set COURSE_SERVICE_DB_USERNAME in .env}
+      POSTGRES_PASSWORD: ${COURSE_SERVICE_DB_PASSWORD:?Set COURSE_SERVICE_DB_PASSWORD in .env}
     ports:
       - "5433:5432"
     volumes:
       - course_service_db_data:/var/lib/postgresql/data
       - ./services/course-service/src/main/resources/db.migration/V1__init_course_schema.sql:/docker-entrypoint-initdb.d/01-init-course-schema.sql:ro
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d course_service"]
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -26,9 +26,9 @@ services:
       course-service-db:
         condition: service_healthy
     environment:
-      COURSE_SERVICE_DB_URL: jdbc:postgresql://course-service-db:5432/course_service
-      COURSE_SERVICE_DB_USERNAME: postgres
-      COURSE_SERVICE_DB_PASSWORD: postgres
+      COURSE_SERVICE_DB_URL: ${COURSE_SERVICE_DB_URL:-jdbc:postgresql://course-service-db:5432/course_service}
+      COURSE_SERVICE_DB_USERNAME: ${COURSE_SERVICE_DB_USERNAME:?Set COURSE_SERVICE_DB_USERNAME in .env}
+      COURSE_SERVICE_DB_PASSWORD: ${COURSE_SERVICE_DB_PASSWORD:?Set COURSE_SERVICE_DB_PASSWORD in .env}
     ports:
       - "8080:8080"
 
@@ -82,5 +82,4 @@ services:
 
 volumes:
   course_service_db_data:
-
 
