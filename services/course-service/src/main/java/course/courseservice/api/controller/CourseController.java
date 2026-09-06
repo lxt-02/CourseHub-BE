@@ -116,12 +116,12 @@ public class CourseController {
     @ResponseStatus(HttpStatus.CREATED)
     public ApiResponse<CourseApiResponse> create(@RequestBody CreateCourseRequest request) {
         return createCourseUseCase.execute(new CreateCourseCommand(
-                request.managerId(),
-                request.title(),
-                request.shortDescription(),
-                request.description(),
-                request.price(),
-                request.difficultyLevel()
+                request.getManagerId(),
+                request.getTitle(),
+                request.getShortDescription(),
+                request.getDescription(),
+                request.getPrice(),
+                request.getDifficultyLevel()
         )).map(CourseApiResponse::from);
     }
 
@@ -144,13 +144,13 @@ public class CourseController {
     @PutMapping("/{id}")
     public ApiResponse<CourseApiResponse> update(@PathVariable UUID id, @RequestBody UpdateCourseRequest request) {
         return updateCourseUseCase.execute(id, new UpdateCourseCommand(
-                request.title(),
-                request.slug(),
-                request.shortDescription(),
-                request.description(),
-                request.thumbnailUrl(),
-                request.price(),
-                request.difficultyLevel()
+                request.getTitle(),
+                request.getSlug(),
+                request.getShortDescription(),
+                request.getDescription(),
+                request.getThumbnailUrl(),
+                request.getPrice(),
+                request.getDifficultyLevel()
         )).map(CourseApiResponse::from);
     }
 
@@ -172,14 +172,14 @@ public class CourseController {
     @PutMapping("/{id}/categories")
     public ApiResponse<CourseApiResponse> assignCategories(@PathVariable UUID id,
                                                            @RequestBody AssignCourseCategoriesRequest request) {
-        return assignCourseCategoriesUseCase.execute(id, new AssignCourseCategoriesCommand(request.categoryIds()))
+        return assignCourseCategoriesUseCase.execute(id, new AssignCourseCategoriesCommand(request.getCategoryIds()))
                 .map(CourseApiResponse::from);
     }
 
     @PostMapping("/{id}/modules")
     @ResponseStatus(HttpStatus.CREATED)
     public ApiResponse<CourseApiResponse> addModule(@PathVariable UUID id, @RequestBody AddModuleRequest request) {
-        return addCourseModuleUseCase.execute(id, new AddModuleCommand(request.title(), request.position()))
+        return addCourseModuleUseCase.execute(id, new AddModuleCommand(request.getTitle(), request.getPosition()))
                 .map(CourseApiResponse::from);
     }
 
@@ -187,7 +187,7 @@ public class CourseController {
     public ApiResponse<CourseApiResponse> moveModule(@PathVariable UUID courseId,
                                                      @PathVariable UUID moduleId,
                                                      @RequestBody MoveModuleRequest request) {
-        return moveCourseModuleUseCase.execute(courseId, moduleId, new MoveModuleCommand(request.position()))
+        return moveCourseModuleUseCase.execute(courseId, moduleId, new MoveModuleCommand(request.getPosition()))
                 .map(CourseApiResponse::from);
     }
 
@@ -204,7 +204,7 @@ public class CourseController {
         return addCourseLessonUseCase.execute(
                 courseId,
                 moduleId,
-                new AddLessonCommand(request.title(), request.lessonType(), request.position())
+                new AddLessonCommand(request.getTitle(), request.getLessonType(), request.getPosition())
         ).map(CourseApiResponse::from);
     }
 
@@ -213,7 +213,7 @@ public class CourseController {
                                                      @PathVariable UUID moduleId,
                                                      @PathVariable UUID lessonId,
                                                      @RequestBody MoveLessonRequest request) {
-        return moveCourseLessonUseCase.execute(courseId, moduleId, lessonId, new MoveLessonCommand(request.position()))
+        return moveCourseLessonUseCase.execute(courseId, moduleId, lessonId, new MoveLessonCommand(request.getPosition()))
                 .map(CourseApiResponse::from);
     }
 
@@ -229,7 +229,7 @@ public class CourseController {
     public ApiResponse<CourseApiResponse> addAsset(@PathVariable UUID id, @RequestBody AddCourseAssetRequest request) {
         return addCourseAssetUseCase.execute(
                 id,
-                new AddCourseAssetCommand(request.assetType(), request.assetUrl(), request.fileName(), request.fileSize())
+                new AddCourseAssetCommand(request.getAssetType(), request.getAssetUrl(), request.getFileName(), request.getFileSize())
         ).map(CourseApiResponse::from);
     }
 

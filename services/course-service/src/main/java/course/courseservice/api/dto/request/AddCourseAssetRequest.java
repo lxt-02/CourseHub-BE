@@ -1,11 +1,20 @@
 package course.courseservice.api.dto.request;
 
 import course.courseservice.domain.model.course.enums.CourseAssetType;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-public record AddCourseAssetRequest(
-        CourseAssetType assetType,
-        String assetUrl,
-        String fileName,
-        Long fileSize
-) {
+@Getter
+@Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class AddCourseAssetRequest {
+    private CourseAssetType assetType;
+    private String assetUrl;
+    private String fileName;
+    private Long fileSize;
 }

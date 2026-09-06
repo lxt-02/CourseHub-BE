@@ -62,7 +62,7 @@ public class CategoryController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public ApiResponse<CategoryApiResponse> create(@RequestBody CreateCategoryRequest request) {
-        return createCategoryUseCase.execute(new CreateCategoryCommand(request.name(), request.description()))
+        return createCategoryUseCase.execute(new CreateCategoryCommand(request.getName(), request.getDescription()))
                 .map(CategoryApiResponse::from);
     }
 
@@ -84,7 +84,7 @@ public class CategoryController {
 
     @PutMapping("/{id}")
     public ApiResponse<CategoryApiResponse> update(@PathVariable UUID id, @RequestBody UpdateCategoryRequest request) {
-        return updateCategoryUseCase.execute(id, new UpdateCategoryCommand(request.name(), request.slug(), request.description()))
+        return updateCategoryUseCase.execute(id, new UpdateCategoryCommand(request.getName(), request.getSlug(), request.getDescription()))
                 .map(CategoryApiResponse::from);
     }
 
