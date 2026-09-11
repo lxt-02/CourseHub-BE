@@ -1,6 +1,5 @@
 package course.courseservice.api.dto.response;
 
-import course.courseservice.application.dto.course.CourseResponse;
 import course.courseservice.domain.model.course.enums.CourseDifficultyLevel;
 import course.courseservice.domain.model.course.enums.CourseStatus;
 import lombok.AllArgsConstructor;
@@ -37,25 +36,4 @@ public class CourseApiResponse {
     private List<CourseAssetApiResponse> assets;
     private Instant createdAt;
     private Instant updatedAt;
-
-    public static CourseApiResponse from(CourseResponse response) {
-        return new CourseApiResponse(
-                response.getId(),
-                response.getManagerId(),
-                response.getTitle(),
-                response.getSlug(),
-                response.getShortDescription(),
-                response.getDescription(),
-                response.getThumbnailUrl(),
-                response.getPrice(),
-                response.getDifficultyLevel(),
-                response.getStatus(),
-                response.getPublishedAt(),
-                response.getCategoryIds(),
-                response.getModules() != null ? response.getModules().stream().map(CourseModuleApiResponse::from).toList() : List.of(),
-                response.getAssets() != null ? response.getAssets().stream().map(CourseAssetApiResponse::from).toList() : List.of(),
-                response.getCreatedAt(),
-                response.getUpdatedAt()
-        );
-    }
 }

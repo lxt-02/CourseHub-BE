@@ -1,6 +1,5 @@
 package course.courseservice.api.dto.response;
 
-import course.courseservice.application.dto.course.CourseModuleResponse;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -25,17 +24,4 @@ public class CourseModuleApiResponse {
     private List<LessonApiResponse> lessons;
     private Instant createdAt;
     private Instant updatedAt;
-
-    public static CourseModuleApiResponse from(CourseModuleResponse response) {
-        return new CourseModuleApiResponse(
-                response.getId(),
-                response.getCourseId(),
-                response.getTitle(),
-                response.getDescription(),
-                response.getPosition(),
-                response.getLessons() != null ? response.getLessons().stream().map(LessonApiResponse::from).toList() : List.of(),
-                response.getCreatedAt(),
-                response.getUpdatedAt()
-        );
-    }
 }

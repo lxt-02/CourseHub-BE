@@ -8,16 +8,9 @@ import course.courseservice.api.dto.request.CreateCourseRequest;
 import course.courseservice.api.dto.request.MoveLessonRequest;
 import course.courseservice.api.dto.request.MoveModuleRequest;
 import course.courseservice.api.dto.request.UpdateCourseRequest;
-import course.courseservice.api.dto.response.CourseApiResponse;
-import course.courseservice.application.command.course.AddCourseAssetCommand;
-import course.courseservice.application.command.course.AddLessonCommand;
-import course.courseservice.application.command.course.AddModuleCommand;
-import course.courseservice.application.command.course.AssignCourseCategoriesCommand;
-import course.courseservice.application.command.course.CreateCourseCommand;
-import course.courseservice.application.command.course.MoveLessonCommand;
-import course.courseservice.application.command.course.MoveModuleCommand;
-import course.courseservice.application.command.course.UpdateCourseCommand;
+import course.courseservice.api.mapper.CourseMapper;
 import course.courseservice.application.dto.ApiResponse;
+import course.courseservice.application.dto.course.CourseResponse;
 import course.courseservice.application.usecase.course.AddCourseAssetUseCase;
 import course.courseservice.application.usecase.course.AddCourseLessonUseCase;
 import course.courseservice.application.usecase.course.AddCourseModuleUseCase;
@@ -36,7 +29,7 @@ import course.courseservice.application.usecase.course.RemoveCourseLessonUseCase
 import course.courseservice.application.usecase.course.RemoveCourseModuleUseCase;
 import course.courseservice.application.usecase.course.ReturnCourseToDraftUseCase;
 import course.courseservice.application.usecase.course.UpdateCourseUseCase;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -45,7 +38,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -73,6 +65,7 @@ public class CourseController {
     private final AddCourseAssetUseCase addCourseAssetUseCase;
     private final RemoveCourseAssetUseCase removeCourseAssetUseCase;
     private final DeleteCourseUseCase deleteCourseUseCase;
+    private final CourseMapper courseMapper;
 
     public CourseController(CreateCourseUseCase createCourseUseCase,
                             GetCourseByIdUseCase getCourseByIdUseCase,
@@ -91,7 +84,8 @@ public class CourseController {
                             RemoveCourseLessonUseCase removeCourseLessonUseCase,
                             AddCourseAssetUseCase addCourseAssetUseCase,
                             RemoveCourseAssetUseCase removeCourseAssetUseCase,
-                            DeleteCourseUseCase deleteCourseUseCase) {
+                            DeleteCourseUseCase deleteCourseUseCase,
+                            CourseMapper courseMapper) {
         this.createCourseUseCase = createCourseUseCase;
         this.getCourseByIdUseCase = getCourseByIdUseCase;
         this.getCourseBySlugUseCase = getCourseBySlugUseCase;
@@ -110,136 +104,116 @@ public class CourseController {
         this.addCourseAssetUseCase = addCourseAssetUseCase;
         this.removeCourseAssetUseCase = removeCourseAssetUseCase;
         this.deleteCourseUseCase = deleteCourseUseCase;
+        this.courseMapper = courseMapper;
     }
 
     @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public ApiResponse<CourseApiResponse> create(@RequestBody CreateCourseRequest request) {
-        return createCourseUseCase.execute(new CreateCourseCommand(
-                request.getManagerId(),
-                request.getTitle(),
-                request.getShortDescription(),
-                request.getDescription(),
-                request.getPrice(),
-                request.getDifficultyLevel()
-        )).map(CourseApiResponse::from);
+    public ResponseEntity<ApiResponse<CourseResponse>> create(@RequestBody CreateCourseRequest request) {
+        return ResponseEntity.ok(createCourseUseCase.execute(courseMapper.toCommand(request)));
     }
 
     @GetMapping("/{id}")
-    public ApiResponse<CourseApiResponse> getById(@PathVariable UUID id) {
-        return getCourseByIdUseCase.execute(id).map(CourseApiResponse::from);
+    public ResponseEntity<ApiResponse<CourseResponse>> getById(@PathVariable UUID id) {
+        return ResponseEntity.ok(getCourseByIdUseCase.execute(id));
     }
 
     @GetMapping("/slug/{slug}")
-    public ApiResponse<CourseApiResponse> getBySlug(@PathVariable String slug) {
-        return getCourseBySlugUseCase.execute(slug).map(CourseApiResponse::from);
+    public ResponseEntity<ApiResponse<CourseResponse>> getBySlug(@PathVariable String slug) {
+        return ResponseEntity.ok(getCourseBySlugUseCase.execute(slug));
     }
 
     @GetMapping("/managers/{managerId}")
-    public ApiResponse<List<CourseApiResponse>> getByManagerId(@PathVariable UUID managerId) {
-        return getCoursesByManagerUseCase.execute(managerId)
-                .map(courses -> courses.stream().map(CourseApiResponse::from).toList());
+    public ResponseEntity<ApiResponse<List<CourseResponse>>> getByManagerId(@PathVariable UUID managerId) {
+        return ResponseEntity.ok(getCoursesByManagerUseCase.execute(managerId));
     }
 
     @PutMapping("/{id}")
-    public ApiResponse<CourseApiResponse> update(@PathVariable UUID id, @RequestBody UpdateCourseRequest request) {
-        return updateCourseUseCase.execute(id, new UpdateCourseCommand(
-                request.getTitle(),
-                request.getSlug(),
-                request.getShortDescription(),
-                request.getDescription(),
-                request.getThumbnailUrl(),
-                request.getPrice(),
-                request.getDifficultyLevel()
-        )).map(CourseApiResponse::from);
+    public ResponseEntity<ApiResponse<CourseResponse>> update(@PathVariable UUID id,
+                                                              @RequestBody UpdateCourseRequest request) {
+        return ResponseEntity.ok(updateCourseUseCase.execute(id, courseMapper.toCommand(request)));
     }
 
     @PostMapping("/{id}/publish")
-    public ApiResponse<CourseApiResponse> publish(@PathVariable UUID id) {
-        return publishCourseUseCase.execute(id).map(CourseApiResponse::from);
+    public ResponseEntity<ApiResponse<CourseResponse>> publish(@PathVariable UUID id) {
+        return ResponseEntity.ok(publishCourseUseCase.execute(id));
     }
 
     @PostMapping("/{id}/archive")
-    public ApiResponse<CourseApiResponse> archive(@PathVariable UUID id) {
-        return archiveCourseUseCase.execute(id).map(CourseApiResponse::from);
+    public ResponseEntity<ApiResponse<CourseResponse>> archive(@PathVariable UUID id) {
+        return ResponseEntity.ok(archiveCourseUseCase.execute(id));
     }
 
     @PostMapping("/{id}/draft")
-    public ApiResponse<CourseApiResponse> returnToDraft(@PathVariable UUID id) {
-        return returnCourseToDraftUseCase.execute(id).map(CourseApiResponse::from);
+    public ResponseEntity<ApiResponse<CourseResponse>> returnToDraft(@PathVariable UUID id) {
+        return ResponseEntity.ok(returnCourseToDraftUseCase.execute(id));
     }
 
     @PutMapping("/{id}/categories")
-    public ApiResponse<CourseApiResponse> assignCategories(@PathVariable UUID id,
-                                                           @RequestBody AssignCourseCategoriesRequest request) {
-        return assignCourseCategoriesUseCase.execute(id, new AssignCourseCategoriesCommand(request.getCategoryIds()))
-                .map(CourseApiResponse::from);
+    public ResponseEntity<ApiResponse<CourseResponse>> assignCategories(@PathVariable UUID id,
+                                                                        @RequestBody AssignCourseCategoriesRequest request) {
+        return ResponseEntity.ok(assignCourseCategoriesUseCase.execute(id, courseMapper.toCommand(request)));
     }
 
     @PostMapping("/{id}/modules")
-    @ResponseStatus(HttpStatus.CREATED)
-    public ApiResponse<CourseApiResponse> addModule(@PathVariable UUID id, @RequestBody AddModuleRequest request) {
-        return addCourseModuleUseCase.execute(id, new AddModuleCommand(request.getTitle(), request.getPosition()))
-                .map(CourseApiResponse::from);
+    public ResponseEntity<ApiResponse<CourseResponse>> addModule(@PathVariable UUID id,
+                                                                 @RequestBody AddModuleRequest request) {
+        return ResponseEntity.ok(addCourseModuleUseCase.execute(id, courseMapper.toCommand(request)));
     }
 
     @PatchMapping("/{courseId}/modules/{moduleId}/position")
-    public ApiResponse<CourseApiResponse> moveModule(@PathVariable UUID courseId,
-                                                     @PathVariable UUID moduleId,
-                                                     @RequestBody MoveModuleRequest request) {
-        return moveCourseModuleUseCase.execute(courseId, moduleId, new MoveModuleCommand(request.getPosition()))
-                .map(CourseApiResponse::from);
+    public ResponseEntity<ApiResponse<CourseResponse>> moveModule(@PathVariable UUID courseId,
+                                                                  @PathVariable UUID moduleId,
+                                                                  @RequestBody MoveModuleRequest request) {
+        return ResponseEntity.ok(moveCourseModuleUseCase.execute(courseId, moduleId, courseMapper.toCommand(request)));
     }
 
     @DeleteMapping("/{courseId}/modules/{moduleId}")
-    public ApiResponse<Void> removeModule(@PathVariable UUID courseId, @PathVariable UUID moduleId) {
-        return removeCourseModuleUseCase.execute(courseId, moduleId);
+    public ResponseEntity<ApiResponse<Void>> removeModule(@PathVariable UUID courseId, @PathVariable UUID moduleId) {
+        return ResponseEntity.ok(removeCourseModuleUseCase.execute(courseId, moduleId));
     }
 
     @PostMapping("/{courseId}/modules/{moduleId}/lessons")
-    @ResponseStatus(HttpStatus.CREATED)
-    public ApiResponse<CourseApiResponse> addLesson(@PathVariable UUID courseId,
-                                                    @PathVariable UUID moduleId,
-                                                    @RequestBody AddLessonRequest request) {
-        return addCourseLessonUseCase.execute(
+    public ResponseEntity<ApiResponse<CourseResponse>> addLesson(@PathVariable UUID courseId,
+                                                                 @PathVariable UUID moduleId,
+                                                                 @RequestBody AddLessonRequest request) {
+        return ResponseEntity.ok(addCourseLessonUseCase.execute(
                 courseId,
                 moduleId,
-                new AddLessonCommand(request.getTitle(), request.getLessonType(), request.getPosition())
-        ).map(CourseApiResponse::from);
+                courseMapper.toCommand(request)
+        ));
     }
 
     @PatchMapping("/{courseId}/modules/{moduleId}/lessons/{lessonId}/position")
-    public ApiResponse<CourseApiResponse> moveLesson(@PathVariable UUID courseId,
-                                                     @PathVariable UUID moduleId,
-                                                     @PathVariable UUID lessonId,
-                                                     @RequestBody MoveLessonRequest request) {
-        return moveCourseLessonUseCase.execute(courseId, moduleId, lessonId, new MoveLessonCommand(request.getPosition()))
-                .map(CourseApiResponse::from);
+    public ResponseEntity<ApiResponse<CourseResponse>> moveLesson(@PathVariable UUID courseId,
+                                                                  @PathVariable UUID moduleId,
+                                                                  @PathVariable UUID lessonId,
+                                                                  @RequestBody MoveLessonRequest request) {
+        return ResponseEntity.ok(moveCourseLessonUseCase.execute(courseId, moduleId, lessonId, courseMapper.toCommand(request)));
     }
 
     @DeleteMapping("/{courseId}/modules/{moduleId}/lessons/{lessonId}")
-    public ApiResponse<Void> removeLesson(@PathVariable UUID courseId,
-                                          @PathVariable UUID moduleId,
-                                          @PathVariable UUID lessonId) {
-        return removeCourseLessonUseCase.execute(courseId, moduleId, lessonId);
+    public ResponseEntity<ApiResponse<Void>> removeLesson(@PathVariable UUID courseId,
+                                                          @PathVariable UUID moduleId,
+                                                          @PathVariable UUID lessonId) {
+        return ResponseEntity.ok(removeCourseLessonUseCase.execute(courseId, moduleId, lessonId));
     }
 
     @PostMapping("/{id}/assets")
-    @ResponseStatus(HttpStatus.CREATED)
-    public ApiResponse<CourseApiResponse> addAsset(@PathVariable UUID id, @RequestBody AddCourseAssetRequest request) {
-        return addCourseAssetUseCase.execute(
+    public ResponseEntity<ApiResponse<CourseResponse>> addAsset(@PathVariable UUID id,
+                                                                @RequestBody AddCourseAssetRequest request) {
+        return ResponseEntity.ok(addCourseAssetUseCase.execute(
                 id,
-                new AddCourseAssetCommand(request.getAssetType(), request.getAssetUrl(), request.getFileName(), request.getFileSize())
-        ).map(CourseApiResponse::from);
+                courseMapper.toCommand(request)
+        ));
     }
 
     @DeleteMapping("/{courseId}/assets/{assetId}")
-    public ApiResponse<Void> removeAsset(@PathVariable UUID courseId, @PathVariable UUID assetId) {
-        return removeCourseAssetUseCase.execute(courseId, assetId);
+    public ResponseEntity<ApiResponse<Void>> removeAsset(@PathVariable UUID courseId, @PathVariable UUID assetId) {
+        return ResponseEntity.ok(removeCourseAssetUseCase.execute(courseId, assetId));
     }
 
     @DeleteMapping("/{id}")
-    public ApiResponse<Void> delete(@PathVariable UUID id) {
-        return deleteCourseUseCase.execute(id);
+    public ResponseEntity<ApiResponse<Void>> delete(@PathVariable UUID id) {
+        return ResponseEntity.ok(deleteCourseUseCase.execute(id));
     }
 }

@@ -1,6 +1,5 @@
 package course.courseservice.api.dto.response;
 
-import course.courseservice.application.dto.course.CourseAssetResponse;
 import course.courseservice.domain.model.course.enums.CourseAssetType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -24,16 +23,4 @@ public class CourseAssetApiResponse {
     private String fileName;
     private Long fileSize;
     private Instant createdAt;
-
-    public static CourseAssetApiResponse from(CourseAssetResponse response) {
-        return new CourseAssetApiResponse(
-                response.getId(),
-                response.getCourseId(),
-                response.getAssetType(),
-                response.getAssetUrl(),
-                response.getFileName(),
-                response.getFileSize(),
-                response.getCreatedAt()
-        );
-    }
 }
